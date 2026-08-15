@@ -448,6 +448,8 @@ function onlangBaueSportfilter() {
         background-repeat:no-repeat; background-position:right 1rem center;
       }
       .onlang-sportdaten-select:focus { outline:none; }
+      .onlang-sportdaten-select option { background:#1e1e2a; color:#ffffff; font-weight:600; }
+      .onlang-sportdaten-select option:checked { background:var(--primary,#CC0000); color:#ffffff; }
     `;
     document.head.appendChild(style);
   }
