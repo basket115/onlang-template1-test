@@ -4,7 +4,7 @@
 // NEU 3.2: Spielplan-Widget + Social Media Auto-Post
 // ============================================================
 
-const ONLANG_API = 'https://script.google.com/macros/s/AKfycbwm0nO0XRsJD2gqWTbfZvRHdKTN0ylbJrWkJt66TcCCiBkX8l7aaV2lF5saHEBwwqeUoA/exec';
+const ONLANG_API = 'https://script.google.com/macros/s/AKfycbx7gnTorNAQz21x3vwZOFQl2bkP2t1QKLppcUSQ_-CQywRS-36AZOeqDDMJg3uXVa2ntA/exec';
 
 // ── Schriftarten-Map ─────────────────────────────────────────
 const ONLANG_SCHRIFTEN = {
