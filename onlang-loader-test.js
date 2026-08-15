@@ -299,6 +299,40 @@ function onlangFormatSportDatum(value) {
   return raw;
 }
 
+// NEU: Repariert kaputte UTF-8-Umlaute in Alt-Daten (nur Anzeige, ändert keine Sheet-Daten)
+function onlangFixUmlaute(value) {
+  let s = String(value ?? '');
+  // Nur eingreifen, wenn ein Mojibake-Marker vorhanden ist (saubere Strings bleiben unberührt)
+  if (s.indexOf('Ã') === -1 && s.indexOf('Â') === -1) return s;
+  try {
+    // Klassische Reparatur: als Latin-1-Bytes interpretieren und neu als UTF-8 dekodieren
+    return decodeURIComponent(escape(s));
+  } catch (e) {
+    // Fallback: gängigste Paare direkt ersetzen
+    return s
+      .replace(/Ã¼/g, 'ü').replace(/Ã¶/g, 'ö').replace(/Ã¤/g, 'ä')
+      .replace(/Ãœ/g, 'Ü').replace(/Ã\u009c/g, 'Ü')
+      .replace(/Ã–/g, 'Ö').replace(/Ã„/g, 'Ä')
+      .replace(/ÃŸ/g, 'ß').replace(/Ã\u009f/g, 'ß')
+      .replace(/Ã©/g, 'é').replace(/Ã¨/g, 'è');
+  }
+}
+
+// NEU: Holt saubere Uhrzeit (HH:MM) aus Roh-Timestamps wie "Sat Dec 30 1899 18:00:00 GMT+0100 ..."
+function onlangFormatSportUhrzeit(value) {
+  if (!value) return '';
+  const raw = String(value);
+  const m = raw.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+  if (m) return String(m[1]).padStart(2, '0') + ':' + m[2];
+  try {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
+  } catch(e) {}
+  return '';
+}
+
 function wendeTabellen(tabellen) {
   const panel = document.getElementById('onlang-sportdaten-tabelle');
   if (!panel) return;
@@ -310,12 +344,12 @@ function wendeTabellen(tabellen) {
 
   panel.innerHTML = tabellen.map(tab => {
     const teamId = tab.teamId || tab.Team_ID || '';
-    const label = onlangTeamLabel(teamId) || teamId || 'Mannschaft';
+    const label = onlangFixUmlaute(onlangTeamLabel(teamId) || teamId || 'Mannschaft');
     const suchname = tab.suchname || '';
     const zeilen = Array.isArray(tab.zeilen) ? tab.zeilen : [];
 
     const rows = zeilen.map((z, i) => {
-      const teamName = z.Team_Name || z.teamName || z.teamname || z.Teamname || z.Team || '';
+      const teamName = onlangFixUmlaute(z.Team_Name || z.teamName || z.teamname || z.Teamname || z.Team || '');
       const istWir = onlangEigenesTeam(teamName, suchname);
       return `<tr${istWir ? ' class="onlang-eigenes-team"' : ''}>
         <td>${onlangEsc(z.rang || z.Rang || i + 1)}</td>
@@ -352,7 +386,7 @@ function wendeErgebnisse(ergebnisse) {
   });
 
   panel.innerHTML = Object.entries(gruppen).map(([teamId, liste]) => {
-    const label = onlangTeamLabel(teamId) || teamId;
+    const label = onlangFixUmlaute(onlangTeamLabel(teamId) || teamId);
     const cards = liste.map(e => {
       const status = e.Ergebnis_Status || e.ergebnisStatus || 'Unklar';
       const statusClass =
@@ -360,13 +394,13 @@ function wendeErgebnisse(ergebnisse) {
         status === 'Niederlage' ? 'niederlage' :
         status === 'Unentschieden' ? 'unentschieden' : 'unklar';
 
-      const heim = e.Heim || e.heim || '';
-      const gast = e.Gast || e.gast || '';
+      const heim = onlangFixUmlaute(e.Heim || e.heim || '');
+      const gast = onlangFixUmlaute(e.Gast || e.gast || '');
       const endstand = String(e.Endstand || e.endstand || '').replace(/\s/g,'');
       const heimGast = e.Verein_HeimGast || e.vereinHeimGast || '';
       const heimIstWir = heimGast ? String(heimGast).toLowerCase() === 'heim' : false;
       const datum = onlangFormatSportDatum(e.Datum || e.datum || '');
-      const uhrzeit = e.Uhrzeit || e.uhrzeit || '';
+      const uhrzeit = onlangFormatSportUhrzeit(e.Uhrzeit || e.uhrzeit || '');
 
       return `<div class="onlang-erg-card">
         <div class="onlang-erg-date">${onlangEsc(datum)}${uhrzeit ? '<br>'+onlangEsc(uhrzeit) : ''}</div>
@@ -385,9 +419,88 @@ function wendeErgebnisse(ergebnisse) {
 }
 
 function wendeSportdaten(tabellen, ergebnisse) {
-  wendeTabellen(tabellen);
-  wendeErgebnisse(ergebnisse);
+  // Daten zwischenspeichern, damit der Filter ohne erneuten Backend-Aufruf umschalten kann
+  window._onlangTabellenData   = Array.isArray(tabellen)   ? tabellen   : [];
+  window._onlangErgebnisseData = Array.isArray(ergebnisse) ? ergebnisse : [];
+  onlangBaueSportfilter();
+  onlangSportdatenFilter('');   // Standard: Alle Mannschaften
 }
+
+// NEU: Baut das Mannschafts-Dropdown einmalig über den Tabs
+function onlangBaueSportfilter() {
+  const wrap = document.querySelector('.onlang-sportdaten-wrap');
+  if (!wrap) return;
+  if (document.getElementById('onlang-sportdaten-filter-wrap')) return; // nur einmal bauen
+
+  // CSS einmalig injizieren
+  if (!document.getElementById('onlang-sportfilter-css')) {
+    const style = document.createElement('style');
+    style.id = 'onlang-sportfilter-css';
+    style.textContent = `
+      .onlang-sportdaten-filter-wrap { margin: 0 0 1.25rem; }
+      .onlang-sportdaten-filter-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted,#888); margin-bottom:.4rem; }
+      .onlang-sportdaten-select {
+        width:100%; max-width:420px; padding:.75rem 2.4rem .75rem 1rem;
+        border:2px solid var(--primary,#CC0000); border-radius:12px;
+        background:transparent; color:inherit; font-size:1rem; font-weight:600;
+        cursor:pointer; appearance:none; -webkit-appearance:none;
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23CC0000' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat:no-repeat; background-position:right 1rem center;
+      }
+      .onlang-sportdaten-select:focus { outline:none; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Welche Team-IDs haben überhaupt Daten?
+  const tabIds = new Set((window._onlangTabellenData   || []).map(t => String(t.teamId || t.Team_ID || '')));
+  const ergIds = new Set((window._onlangErgebnisseData || []).map(e => String(e.Team_ID || e.teamId || '')));
+
+  // Mandantensicher: nur eigene Teams aus der Team-Registry, die auch Daten haben
+  const teams = window._onlangTeams || [];
+  let optionsTeams = teams.filter(t => {
+    const id = String(t.Team_ID || '');
+    return id && (tabIds.has(id) || ergIds.has(id));
+  });
+  // Fallback: falls die Registry nicht passt, aus den vorhandenen Daten-IDs bauen
+  if (!optionsTeams.length) {
+    const alleIds = [...new Set([...tabIds, ...ergIds])].filter(Boolean);
+    optionsTeams = alleIds.map(id => ({ Team_ID: id, Team_Name: onlangTeamLabel(id) || id }));
+  }
+
+  const optionsHtml = ['<option value="">Alle Mannschaften</option>']
+    .concat(optionsTeams.map(t => {
+      const id   = onlangEsc(t.Team_ID || '');
+      const name = onlangEsc(onlangFixUmlaute(t.Team_Name || t.Team_ID || ''));
+      return '<option value="' + id + '">' + name + '</option>';
+    })).join('');
+
+  const box = document.createElement('div');
+  box.className = 'onlang-sportdaten-filter-wrap';
+  box.id = 'onlang-sportdaten-filter-wrap';
+  box.innerHTML =
+    '<div class="onlang-sportdaten-filter-label">Mannschaft wählen</div>' +
+    '<select class="onlang-sportdaten-select" id="onlang-sportdaten-select" onchange="onlangSportdatenFilter(this.value)">' +
+    optionsHtml + '</select>';
+
+  // Direkt über den Tabs einfügen
+  const tabs = wrap.querySelector('.onlang-sportdaten-tabs');
+  if (tabs) wrap.insertBefore(box, tabs);
+  else      wrap.insertBefore(box, wrap.firstChild);
+}
+
+// NEU: Filtert Tabelle + Ergebnisse auf eine Mannschaft (leer = alle)
+window.onlangSportdatenFilter = function(teamId) {
+  const alleTab = window._onlangTabellenData   || [];
+  const alleErg = window._onlangErgebnisseData || [];
+  if (!teamId) {
+    wendeTabellen(alleTab);
+    wendeErgebnisse(alleErg);
+  } else {
+    wendeTabellen(alleTab.filter(t => String(t.teamId  || t.Team_ID || '') === String(teamId)));
+    wendeErgebnisse(alleErg.filter(e => String(e.Team_ID || e.teamId || '') === String(teamId)));
+  }
+};
 
 window.onlangSportdatenTab = function(tab, btn) {
   document.querySelectorAll('.onlang-sportdaten-tab').forEach(b => b.classList.remove('aktiv'));
