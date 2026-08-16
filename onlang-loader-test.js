@@ -53,7 +53,7 @@ function youtubeEmbed(url) {
 
 function mediaBild(b, hoehe, breite) {
   breite = breite || '100%';
-  if (b.Bild_URL) return '<img src="' + b.Bild_URL + '" alt="' + (b.Titel||'') + '" style="width:' + breite + ';height:' + hoehe + 'px;object-fit:cover;display:block;">';
+  if (b.Bild_URL) return '<img src="' + b.Bild_URL + '" alt="' + (b.Titel||'') + '" style="width:' + breite + ';height:' + hoehe + 'px;object-fit:contain;background:#f2f2f2;display:block;">';
   if (b.Video_URL) {
     const embed = youtubeEmbed(b.Video_URL);
     if (embed && breite === '100%') return '<iframe src="' + embed + '" style="width:100%;height:' + hoehe + 'px;border:none;display:block;" allowfullscreen></iframe>';
@@ -201,7 +201,7 @@ function onlangInjectModal() {
 function onlangOeffneModal(b) {
   const embed = youtubeEmbed(b.Video_URL || '');
   let media = '';
-  if (b.Bild_URL) media = '<img src="' + b.Bild_URL + '" style="width:100%;height:auto;max-height:70vh;object-fit:contain;display:block;background:#f2f2f2;">';
+  if (b.Bild_URL) media = '<div style="position:relative;width:100%;padding-bottom:56.25%;height:0;background:#f2f2f2;overflow:hidden;border-radius:16px 16px 0 0;"><img src="' + b.Bild_URL + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;"></div>';
   else if (embed) media = '<iframe src="' + embed + '" style="width:100%;height:260px;border:none;display:block;" allowfullscreen></iframe>';
   else if (b.Video_URL) media = '<div style="width:100%;height:180px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:4rem;">▶️</div>';
   document.getElementById('onlang-modal-media').innerHTML = media;
