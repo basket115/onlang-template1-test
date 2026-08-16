@@ -374,7 +374,7 @@ function wendeErgebnisse(ergebnisse) {
   if (!panel) return;
 
   if (!Array.isArray(ergebnisse) || !ergebnisse.length) {
-    panel.innerHTML = '<div class="onlang-sportdaten-leer">Keine Ergebnisse verfügbar.</div>';
+    panel.innerHTML = '<div class="onlang-sportdaten-leer">Bitte um etwas Geduld bis zum ersten Spieltag – die Ergebnisse erscheinen automatisch, sobald gespielt wurde.</div>';
     return;
   }
 
