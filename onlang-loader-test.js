@@ -201,7 +201,7 @@ function onlangInjectModal() {
 function onlangOeffneModal(b) {
   const embed = youtubeEmbed(b.Video_URL || '');
   let media = '';
-  if (b.Bild_URL) media = '<img src="' + b.Bild_URL + '" style="width:100%;height:260px;object-fit:cover;display:block;">';
+  if (b.Bild_URL) media = '<img src="' + b.Bild_URL + '" style="width:100%;height:auto;max-height:70vh;object-fit:contain;display:block;background:#f2f2f2;">';
   else if (embed) media = '<iframe src="' + embed + '" style="width:100%;height:260px;border:none;display:block;" allowfullscreen></iframe>';
   else if (b.Video_URL) media = '<div style="width:100%;height:180px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:4rem;">▶️</div>';
   document.getElementById('onlang-modal-media').innerHTML = media;
@@ -686,6 +686,11 @@ function zeigeLoading(an) {
 // INIT
 // ============================================================
 async function onlangInit() {
+  // Beim Öffnen immer oben bei der Startseite beginnen (nicht bei Spieldaten/News)
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  window.scrollTo(0, 0);
+
   const kundenId = getKundenId();
   onlangInjectModal();
   if (!kundenId) { console.log('ONLANG v3.2: Demo-Modus'); return; }
