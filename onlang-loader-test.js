@@ -216,7 +216,10 @@ function onlangZeigeHauptseite() {
 // ── MODAL ────────────────────────────────────────────────────
 function onlangInjectModal() {
   if (document.getElementById('onlang-modal')) return;
-  document.head.insertAdjacentHTML('beforeend', '<style id="onlang-modal-css">.onlang-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9000;align-items:center;justify-content:center;padding:1rem;}.onlang-modal-overlay.open{display:flex;}.onlang-modal-box{
+  document.head.insertAdjacentHTML('beforeend', '<style id="onlang-modal-css">.onlang-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9000;align-items:flex-start;
+overflow-y:auto;
+justify-content:center;
+padding:1rem;}.onlang-modal-overlay.open{display:flex;}.onlang-modal-box{
   background:white;
   border-radius:16px;
   max-width:680px;
