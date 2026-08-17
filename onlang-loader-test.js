@@ -236,10 +236,10 @@ function onlangOeffneModal(b) {
   const embed = youtubeEmbed(b.Video_URL || '');
   let media = '';
 if (b.Bild_URL) media =
-  '<div style="width:100%;background:#f2f2f2;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;">' +
+  '<div style="width:100%;background:#f2f2f2;border-radius:16px 16px 0 0;overflow:hidden;padding:0;">' +
   '<img src="' + b.Bild_URL +
   '" alt="' + (b.Titel || '') +
-  '" style="display:block;width:auto;height:auto;max-width:100%;max-height:65vh;margin:0 auto;object-fit:contain;">' +
+  '" style="display:block;width:100%;height:auto;margin:0 auto;">' +
   '</div>';
   else if (embed) media = '<iframe src="' + embed + '" style="width:100%;height:260px;border:none;display:block;" allowfullscreen></iframe>';
   else if (b.Video_URL) media = '<div style="width:100%;height:180px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:4rem;">▶️</div>';
