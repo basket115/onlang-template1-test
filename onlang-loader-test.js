@@ -56,21 +56,20 @@ function mediaBild(b, hoehe, breite) {
 
   if (b.Bild_URL) {
 
-    // Kleine feste Vorschaubilder, z.B. News-Liste 120 x 90
+    // Kleine Vorschaubilder in Listen
     if (breite !== '100%') {
-      return '<img src="' + b.Bild_URL +
+      return '<div style="width:' + breite + ';height:' + hoehe + 'px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
+        '<img src="' + b.Bild_URL +
         '" alt="' + (b.Titel || '') +
-        '" style="width:' + breite +
-        ';height:' + hoehe +
-        'px;object-fit:cover;display:block;">';
+        '" style="width:100%;height:100%;object-fit:contain;display:block;">' +
+        '</div>';
     }
 
-    // Große Bilder in allen Templates:
-    // Original-Seitenverhältnis automatisch erhalten
-    return '<div style="width:100%;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#f2f2f2;">' +
+    // Zentrale Bilddarstellung für alle großen Beitragskarten
+    return '<div style="width:100%;aspect-ratio:16/9;background:#f2f2f2;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
       '<img src="' + b.Bild_URL +
       '" alt="' + (b.Titel || '') +
-      '" style="display:block;width:100%;height:auto;max-width:100%;object-fit:contain;">' +
+      '" style="width:100%;height:100%;object-fit:contain;display:block;">' +
       '</div>';
   }
 
@@ -79,8 +78,7 @@ function mediaBild(b, hoehe, breite) {
 
     if (embed && breite === '100%') {
       return '<iframe src="' + embed +
-        '" style="width:100%;height:' + hoehe +
-        'px;border:none;display:block;" allowfullscreen></iframe>';
+        '" style="width:100%;aspect-ratio:16/9;border:none;display:block;" allowfullscreen></iframe>';
     }
 
     return '<div style="width:' + breite +
@@ -236,11 +234,11 @@ function onlangInjectModal() {
 function onlangOeffneModal(b) {
   const embed = youtubeEmbed(b.Video_URL || '');
   let media = '';
-  if (b.Bild_URL) media =
-  '<div style="width:100%;background:#f2f2f2;border-radius:16px 16px 0 0;overflow:hidden;text-align:center;">' +
+if (b.Bild_URL) media =
+  '<div style="width:100%;background:#f2f2f2;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;">' +
   '<img src="' + b.Bild_URL +
   '" alt="' + (b.Titel || '') +
-  '" style="display:block;width:100%;height:auto;max-width:100%;max-height:70vh;object-fit:contain;margin:0 auto;">' +
+  '" style="display:block;width:auto;height:auto;max-width:100%;max-height:65vh;margin:0 auto;object-fit:contain;">' +
   '</div>';
   else if (embed) media = '<iframe src="' + embed + '" style="width:100%;height:260px;border:none;display:block;" allowfullscreen></iframe>';
   else if (b.Video_URL) media = '<div style="width:100%;height:180px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:4rem;">▶️</div>';
