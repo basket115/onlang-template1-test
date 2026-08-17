@@ -53,7 +53,7 @@ function youtubeEmbed(url) {
 
 function mediaBild(b, hoehe, breite) {
   breite = breite || '100%';
-  if (b.Bild_URL) return '<img src="' + b.Bild_URL + '" alt="' + (b.Titel||'') + '" style="width:' + breite + ';height:' + hoehe + 'px;object-fit:contain;background:#f2f2f2;display:block;">';
+  if (b.Bild_URL) return '<img src="' + b.Bild_URL + '" alt="' + (b.Titel||'') + '" style="width:' + breite + ';height:auto;max-height:' + hoehe + 'px;object-fit:contain;background:#f2f2f2;display:block;margin:0 auto;">';
   if (b.Video_URL) {
     const embed = youtubeEmbed(b.Video_URL);
     if (embed && breite === '100%') return '<iframe src="' + embed + '" style="width:100%;height:' + hoehe + 'px;border:none;display:block;" allowfullscreen></iframe>';
