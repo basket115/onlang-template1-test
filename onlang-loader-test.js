@@ -53,13 +53,48 @@ function youtubeEmbed(url) {
 
 function mediaBild(b, hoehe, breite) {
   breite = breite || '100%';
-  if (b.Bild_URL) return '<img src="' + b.Bild_URL + '" alt="' + (b.Titel||'') + '" style="width:' + breite + ';height:auto;max-height:' + hoehe + 'px;object-fit:contain;background:#f2f2f2;display:block;margin:0 auto;">';
+
+  if (b.Bild_URL) {
+
+    // Kleine feste Vorschaubilder, z.B. News-Liste 120 x 90
+    if (breite !== '100%') {
+      return '<img src="' + b.Bild_URL +
+        '" alt="' + (b.Titel || '') +
+        '" style="width:' + breite +
+        ';height:' + hoehe +
+        'px;object-fit:cover;display:block;">';
+    }
+
+    // Große Bilder in allen Templates:
+    // Original-Seitenverhältnis automatisch erhalten
+    return '<div style="width:100%;display:flex;justify-content:center;align-items:center;overflow:hidden;background:#f2f2f2;">' +
+      '<img src="' + b.Bild_URL +
+      '" alt="' + (b.Titel || '') +
+      '" style="display:block;width:100%;height:auto;max-width:100%;object-fit:contain;">' +
+      '</div>';
+  }
+
   if (b.Video_URL) {
     const embed = youtubeEmbed(b.Video_URL);
-    if (embed && breite === '100%') return '<iframe src="' + embed + '" style="width:100%;height:' + hoehe + 'px;border:none;display:block;" allowfullscreen></iframe>';
-    return '<div style="width:' + breite + ';height:' + hoehe + 'px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:' + (hoehe>150?'3rem':'1.5rem') + ';">▶️</div>';
+
+    if (embed && breite === '100%') {
+      return '<iframe src="' + embed +
+        '" style="width:100%;height:' + hoehe +
+        'px;border:none;display:block;" allowfullscreen></iframe>';
+    }
+
+    return '<div style="width:' + breite +
+      ';height:' + hoehe +
+      'px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:' +
+      (hoehe > 150 ? '3rem' : '1.5rem') +
+      ';">▶️</div>';
   }
-  return '<div style="width:' + breite + ';height:' + hoehe + 'px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:' + (hoehe>150?'3rem':'1.5rem') + ';">📰</div>';
+
+  return '<div style="width:' + breite +
+    ';height:' + hoehe +
+    'px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:' +
+    (hoehe > 150 ? '3rem' : '1.5rem') +
+    ';">📰</div>';
 }
 
 // ── SCHRIFTART ───────────────────────────────────────────────
@@ -201,7 +236,12 @@ function onlangInjectModal() {
 function onlangOeffneModal(b) {
   const embed = youtubeEmbed(b.Video_URL || '');
   let media = '';
-  if (b.Bild_URL) media = '<div style="position:relative;width:100%;padding-bottom:56.25%;height:0;background:#f2f2f2;overflow:hidden;border-radius:16px 16px 0 0;"><img src="' + b.Bild_URL + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;"></div>';
+  if (b.Bild_URL) media =
+  '<div style="width:100%;background:#f2f2f2;border-radius:16px 16px 0 0;overflow:hidden;text-align:center;">' +
+  '<img src="' + b.Bild_URL +
+  '" alt="' + (b.Titel || '') +
+  '" style="display:block;width:100%;height:auto;max-width:100%;max-height:70vh;object-fit:contain;margin:0 auto;">' +
+  '</div>';
   else if (embed) media = '<iframe src="' + embed + '" style="width:100%;height:260px;border:none;display:block;" allowfullscreen></iframe>';
   else if (b.Video_URL) media = '<div style="width:100%;height:180px;background:#0D1B2A;display:flex;align-items:center;justify-content:center;font-size:4rem;">▶️</div>';
   document.getElementById('onlang-modal-media').innerHTML = media;
