@@ -66,10 +66,11 @@ function mediaBild(b, hoehe, breite) {
     }
 
     // Zentrale Bilddarstellung für alle großen Beitragskarten
-    return '<div style="width:100%;aspect-ratio:16/9;background:#f2f2f2;display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
+    // Original-Seitenverhältnis bleibt vollständig erhalten
+    return '<div style="width:100%;background:#f2f2f2;overflow:hidden;">' +
       '<img src="' + b.Bild_URL +
       '" alt="' + (b.Titel || '') +
-      '" style="width:100%;height:100%;object-fit:contain;display:block;">' +
+      '" style="width:100%;height:auto;display:block;">' +
       '</div>';
   }
 
