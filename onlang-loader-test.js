@@ -775,7 +775,7 @@ async function onlangInit() {
   );
 
   // Bestehender Spielplan bleibt unverändert erhalten.
-  await wendeSpielplan(kundenId);
+  wendeSpielplan(kundenId).catch(console.error);
 
   zeigeLoading(false);
   console.log('ONLANG v3.2:', kundenId,
